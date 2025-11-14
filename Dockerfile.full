@@ -40,6 +40,7 @@ RUN cd 3proxy &&\
 FROM busybox:glibc
 COPY --from=buildenv /usr/local/lib/3proxy/libdl.so.* /lib/
 COPY --from=buildenv 3proxy/bin/3proxy /bin/
+COPY --from=buildenv 3proxy/bin/mycrypt /bin/
 COPY --from=buildenv 3proxy/bin/*.ld.so /usr/local/3proxy/libexec/
 RUN mkdir /usr/local/3proxy/logs &&\
  mkdir /usr/local/3proxy/conf &&\

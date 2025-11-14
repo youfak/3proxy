@@ -5,6 +5,13 @@
 #   ./deploy.sh
 #   ./deploy.sh --http-port 3128 --socks-port 1080 --admin-port 8080
 #   或使用环境变量: HTTP_PORT=3128 SOCKS_PORT=1080 ADMIN_PORT=8080 ./deploy.sh
+# 使用加密 密码 请使用 mycrypt 命令
+# 例如: mycrypt password
+# 然后使用密码: password
+# 例如: mycrypt password
+# 生成加密密码
+# mycrypt $$ mypassword
+# 假设输出: CR:$1$abc123$xyz789
 
 set -e
 

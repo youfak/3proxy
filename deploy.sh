@@ -216,8 +216,6 @@ echo "✓ 带宽限制配置已创建: ${CONFIG_DIR}/bandlimiters"
 # 创建 docker-compose.yml
 echo "[6/7] 创建 docker-compose.yml..."
 cat > docker-compose.yml << EOF
-version: "3.8"
-
 services:
   3proxy:
     image: ${IMAGE_NAME}

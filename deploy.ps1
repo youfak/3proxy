@@ -191,8 +191,6 @@ Write-Host "✓ 带宽限制配置已创建: $ConfigDir\bandlimiters" -Foregroun
 # 创建 docker-compose.yml
 Write-Host "[6/7] 创建 docker-compose.yml..." -ForegroundColor Yellow
 $composeContent = @"
-version: "3.8"
-
 services:
   3proxy:
     image: ${ImageName}

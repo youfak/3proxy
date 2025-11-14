@@ -11,29 +11,57 @@ set -e
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --http-port=*)
+            HTTP_PORT="${1#*=}"
+            shift
+            ;;
         --http-port)
             HTTP_PORT="$2"
             shift 2
+            ;;
+        --socks-port=*)
+            SOCKS_PORT="${1#*=}"
+            shift
             ;;
         --socks-port)
             SOCKS_PORT="$2"
             shift 2
             ;;
+        --admin-port=*)
+            ADMIN_PORT="${1#*=}"
+            shift
+            ;;
         --admin-port)
             ADMIN_PORT="$2"
             shift 2
+            ;;
+        --admin-user=*)
+            ADMIN_USER="${1#*=}"
+            shift
             ;;
         --admin-user)
             ADMIN_USER="$2"
             shift 2
             ;;
+        --admin-pass=*)
+            ADMIN_PASS="${1#*=}"
+            shift
+            ;;
         --admin-pass)
             ADMIN_PASS="$2"
             shift 2
             ;;
+        --proxy-user=*)
+            PROXY_USER="${1#*=}"
+            shift
+            ;;
         --proxy-user)
             PROXY_USER="$2"
             shift 2
+            ;;
+        --proxy-pass=*)
+            PROXY_PASS="${1#*=}"
+            shift
             ;;
         --proxy-pass)
             PROXY_PASS="$2"
@@ -55,6 +83,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "示例:"
             echo "  ./deploy.sh --http-port 3128 --socks-port 1080 --admin-port 8080"
+            echo "  ./deploy.sh --http-port=3128 --socks-port=1080 --admin-port=8080"
             echo "  HTTP_PORT=3128 SOCKS_PORT=1080 ADMIN_PORT=8080 ./deploy.sh"
             exit 0
             ;;

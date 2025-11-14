@@ -265,7 +265,15 @@ Write-Host "[7/7] 启动容器..." -ForegroundColor Yellow
 $existingContainer = docker ps -a --format '{{.Names}}' | Select-String -Pattern "^${ContainerName}$"
 if ($existingContainer) {
     Write-Host "  停止并删除旧容器..." -ForegroundColor Gray
+    # 先尝试使用 docker compose down
     Invoke-Expression "${dockerComposeCmd} down" 2>$null
+    # 如果还有残留，强制删除容器
+    $stillExists = docker ps -a --format '{{.Names}}' | Select-String -Pattern "^${ContainerName}$"
+    if ($stillExists) {
+        Write-Host "  强制删除残留容器..." -ForegroundColor Gray
+        docker stop "${ContainerName}" 2>$null
+        docker rm -f "${ContainerName}" 2>$null
+    }
 }
 
 # 启动容器

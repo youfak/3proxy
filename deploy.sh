@@ -275,7 +275,14 @@ echo "使用命令: ${DOCKER_COMPOSE_CMD}"
 echo "[7/7] 启动容器..."
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "  停止并删除旧容器..."
+    # 先尝试使用 docker compose down
     ${DOCKER_COMPOSE_CMD} down 2>/dev/null || true
+    # 如果还有残留，强制删除容器
+    if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        echo "  强制删除残留容器..."
+        docker stop "${CONTAINER_NAME}" 2>/dev/null || true
+        docker rm -f "${CONTAINER_NAME}" 2>/dev/null || true
+    fi
 fi
 
 # 启动容器

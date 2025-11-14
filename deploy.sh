@@ -10,7 +10,8 @@
 # 然后使用密码: password
 # 例如: mycrypt password
 # 生成加密密码
-# mycrypt $$ mypassword
+# CR (MD5 crypt)	mycrypt salt password	中	Linux/Unix 环境（推荐）
+# NT (MD4)	mycrypt password	中	Windows/Samba 环境
 # 假设输出: CR:$1$abc123$xyz789
 
 set -e

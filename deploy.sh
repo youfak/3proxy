@@ -150,9 +150,8 @@ nserver 8.8.8.8
 nserver 8.8.4.4
 nscache 65536
 
-# 日志配置
-log /logs/3proxy-%y%m%d.log D
-rotate 60
+# 日志配置（输出到 stdout，方便 docker logs 查看，避免权限问题）
+log
 
 # 流量计数器
 counter /count/3proxy.3cf
@@ -228,6 +227,12 @@ services:
     volumes:
       - ${CONFIG_DIR}:/usr/local/3proxy/conf
       - ./data:/usr/local/3proxy
+    command: >
+      sh -c "
+        mkdir -p /usr/local/3proxy/count &&
+        chmod 777 /usr/local/3proxy/count &&
+        /bin/3proxy /etc/3proxy/3proxy.cfg
+      "
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
       interval: 30s
@@ -237,8 +242,10 @@ services:
 EOF
 echo "✓ docker-compose.yml 已创建"
 
-# 创建数据目录（用于存储日志和计数器数据）
-mkdir -p ./data/logs ./data/count
+# 创建数据目录（用于存储计数器数据）
+mkdir -p ./data/count
+# 设置目录权限，确保容器内的用户（uid 65535）可以写入
+chmod 777 ./data/count 2>/dev/null || true
 
 # 检测 docker compose 命令
 if docker compose version >/dev/null 2>&1; then

@@ -122,9 +122,8 @@ nserver 8.8.8.8
 nserver 8.8.4.4
 nscache 65536
 
-# 日志配置
-log /logs/3proxy-%y%m%d.log D
-rotate 60
+# 日志配置（输出到 stdout，方便 docker logs 查看，避免权限问题）
+log
 
 # 流量计数器
 counter /count/3proxy.3cf
@@ -203,6 +202,12 @@ services:
     volumes:
       - ${ConfigDir}:/usr/local/3proxy/conf
       - ./data:/usr/local/3proxy
+    command: >
+      sh -c "
+        mkdir -p /usr/local/3proxy/count &&
+        chmod 777 /usr/local/3proxy/count &&
+        /bin/3proxy /etc/3proxy/3proxy.cfg
+      "
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
       interval: 30s
@@ -213,8 +218,14 @@ services:
 $composeContent | Out-File -FilePath "docker-compose.yml" -Encoding utf8
 Write-Host "✓ docker-compose.yml 已创建" -ForegroundColor Green
 
-# 创建数据目录（用于存储日志和计数器数据）
-New-Item -ItemType Directory -Path ".\data\logs", ".\data\count" -Force | Out-Null
+# 创建数据目录（用于存储计数器数据）
+New-Item -ItemType Directory -Path ".\data\count" -Force | Out-Null
+# 设置目录权限（Windows 上可能无效，但容器内会处理）
+try {
+    icacls ".\data\count" /grant Everyone:F 2>$null | Out-Null
+} catch {
+    # 忽略权限设置错误，容器内会处理
+}
 
 # 检测 docker compose 命令
 $dockerComposeCmd = $null

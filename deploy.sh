@@ -242,15 +242,39 @@ echo "✓ docker-compose.yml 已创建"
 # 创建数据目录（用于存储日志和计数器数据）
 mkdir -p ./data/logs ./data/count
 
+# 检测 docker compose 命令
+if docker compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose >/dev/null 2>&1 && docker-compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
+    echo ""
+    echo "=========================================="
+    echo "✗ 错误: 未找到 docker compose 或 docker-compose"
+    echo "=========================================="
+    echo ""
+    echo "请安装 Docker Compose:"
+    echo "  - 新版本 Docker: docker compose 已包含在内"
+    echo "  - 旧版本: 请安装 docker-compose"
+    echo ""
+    echo "检查命令:"
+    echo "  docker compose version"
+    echo "  或"
+    echo "  docker-compose --version"
+    exit 1
+fi
+
+echo "使用命令: ${DOCKER_COMPOSE_CMD}"
+
 # 停止并删除旧容器（如果存在）
 echo "[7/7] 启动容器..."
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "  停止并删除旧容器..."
-    docker-compose down 2>/dev/null || true
+    ${DOCKER_COMPOSE_CMD} down 2>/dev/null || true
 fi
 
 # 启动容器
-docker-compose up -d
+${DOCKER_COMPOSE_CMD} up -d
 
 # 等待容器启动
 echo "  等待容器启动..."
@@ -285,8 +309,8 @@ if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo ""
     echo "常用命令："
     echo "  - 查看日志: docker logs -f ${CONTAINER_NAME}"
-    echo "  - 停止服务: docker-compose down"
-    echo "  - 重启服务: docker-compose restart"
+    echo "  - 停止服务: ${DOCKER_COMPOSE_CMD} down"
+    echo "  - 重启服务: ${DOCKER_COMPOSE_CMD} restart"
     echo ""
 else
     echo ""

@@ -218,16 +218,49 @@ Write-Host "✓ docker-compose.yml 已创建" -ForegroundColor Green
 # 创建数据目录（用于存储日志和计数器数据）
 New-Item -ItemType Directory -Path ".\data\logs", ".\data\count" -Force | Out-Null
 
+# 检测 docker compose 命令
+$dockerComposeCmd = $null
+if (Get-Command docker -ErrorAction SilentlyContinue) {
+    $result = docker compose version 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        $dockerComposeCmd = "docker compose"
+    } else {
+        $result = docker-compose --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $dockerComposeCmd = "docker-compose"
+        }
+    }
+}
+
+if (-not $dockerComposeCmd) {
+    Write-Host ""
+    Write-Host "==========================================" -ForegroundColor Red
+    Write-Host "✗ 错误: 未找到 docker compose 或 docker-compose" -ForegroundColor Red
+    Write-Host "==========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "请安装 Docker Compose:" -ForegroundColor Yellow
+    Write-Host "  - 新版本 Docker: docker compose 已包含在内" -ForegroundColor White
+    Write-Host "  - 旧版本: 请安装 docker-compose" -ForegroundColor White
+    Write-Host ""
+    Write-Host "检查命令:" -ForegroundColor Yellow
+    Write-Host "  docker compose version" -ForegroundColor White
+    Write-Host "  或" -ForegroundColor White
+    Write-Host "  docker-compose --version" -ForegroundColor White
+    exit 1
+}
+
+Write-Host "使用命令: ${dockerComposeCmd}" -ForegroundColor Gray
+
 # 停止并删除旧容器（如果存在）
 Write-Host "[7/7] 启动容器..." -ForegroundColor Yellow
 $existingContainer = docker ps -a --format '{{.Names}}' | Select-String -Pattern "^${ContainerName}$"
 if ($existingContainer) {
     Write-Host "  停止并删除旧容器..." -ForegroundColor Gray
-    docker-compose down 2>$null
+    Invoke-Expression "${dockerComposeCmd} down" 2>$null
 }
 
 # 启动容器
-docker-compose up -d
+Invoke-Expression "${dockerComposeCmd} up -d"
 
 # 等待容器启动
 Write-Host "  等待容器启动..." -ForegroundColor Gray
@@ -263,8 +296,8 @@ if ($runningContainer) {
     Write-Host ""
     Write-Host "常用命令：" -ForegroundColor Cyan
     Write-Host "  - 查看日志: docker logs -f ${ContainerName}" -ForegroundColor White
-    Write-Host "  - 停止服务: docker-compose down" -ForegroundColor White
-    Write-Host "  - 重启服务: docker-compose restart" -ForegroundColor White
+    Write-Host "  - 停止服务: ${dockerComposeCmd} down" -ForegroundColor White
+    Write-Host "  - 重启服务: ${dockerComposeCmd} restart" -ForegroundColor White
     Write-Host ""
 } else {
     Write-Host ""
